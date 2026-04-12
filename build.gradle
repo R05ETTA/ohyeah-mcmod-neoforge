@@ -85,6 +85,9 @@ neoForge {
 
         // applies to all the run configs above
         configureEach {
+            // Ensure IntelliJ launches regenerate ModDev arg files instead of relying on a past Gradle sync.
+            taskBefore(tasks.named("prepare${name.capitalize()}Run"))
+
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
             // "SCAN": For mods scan.

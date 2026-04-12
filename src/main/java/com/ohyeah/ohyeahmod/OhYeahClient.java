@@ -24,8 +24,6 @@ public class OhYeahClient {
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
-        // Some client setup code
-        OhYeah.LOGGER.info("HELLO FROM CLIENT SETUP");
-        OhYeah.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        // 客户端初始化逻辑
     }
 }
