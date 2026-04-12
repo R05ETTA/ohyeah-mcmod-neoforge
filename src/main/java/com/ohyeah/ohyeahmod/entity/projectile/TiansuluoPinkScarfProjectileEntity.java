@@ -3,7 +3,6 @@ package com.ohyeah.ohyeahmod.entity.projectile;
 import com.ohyeah.ohyeahmod.registry.ModEntityTypes;
 import com.ohyeah.ohyeahmod.registry.ModItems;
 import net.minecraft.core.particles.ItemParticleOption;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -15,14 +14,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
-/**
- * 粉围巾天素罗发射的投射物（看起来像蛋）。
- */
 public class TiansuluoPinkScarfProjectileEntity extends ThrowableItemProjectile {
     private float damage = 1.0F;
 
-    public TiansuluoPinkScarfProjectileEntity(EntityType<? extends TiansuluoPinkScarfProjectileEntity> entityType, Level level) {
-        super(entityType, level);
+    public TiansuluoPinkScarfProjectileEntity(EntityType<? extends TiansuluoPinkScarfProjectileEntity> type, Level level) {
+        super(type, level);
     }
 
     public TiansuluoPinkScarfProjectileEntity(Level level, LivingEntity owner) {
@@ -42,17 +38,13 @@ public class TiansuluoPinkScarfProjectileEntity extends ThrowableItemProjectile 
         this.damage = Math.max(0.0F, damage);
     }
 
-    private ParticleOptions getParticleParameters() {
-        ItemStack itemstack = this.getItem();
-        return (ParticleOptions)(itemstack.isEmpty() ? ParticleTypes.ITEM_SNOWBALL : new ItemParticleOption(ParticleTypes.ITEM, itemstack));
-    }
-
     @Override
-    public void handleEntityEvent(byte id) {
-        if (id == 3) {
-            ParticleOptions particleoptions = this.getParticleParameters();
-            for (int i = 0; i < 8; ++i) {
-                this.level().addParticle(particleoptions, this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);
+    public void handleEntityEvent(byte status) {
+        if (status == 3) {
+            ItemStack stack = this.getItem();
+            ItemParticleOption particle = new ItemParticleOption(ParticleTypes.ITEM, stack.isEmpty() ? new ItemStack(this.getDefaultItem()) : stack);
+            for (int i = 0; i < 8; i++) {
+                this.level().addParticle(particle, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
             }
         }
     }
@@ -68,7 +60,7 @@ public class TiansuluoPinkScarfProjectileEntity extends ThrowableItemProjectile 
     protected void onHit(HitResult result) {
         super.onHit(result);
         if (!this.level().isClientSide) {
-            this.level().broadcastEntityEvent(this, (byte)3);
+            this.level().broadcastEntityEvent(this, (byte) 3);
             this.discard();
         }
     }

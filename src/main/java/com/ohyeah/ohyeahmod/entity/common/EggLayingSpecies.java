@@ -1,43 +1,29 @@
 package com.ohyeah.ohyeahmod.entity.common;
 
-import com.ohyeah.ohyeahmod.entity.tiansuluo.TiansuluoCoreComponent;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
+
 import java.util.UUID;
 
 public interface EggLayingSpecies {
-    default boolean hasCarriedEggBlock() {
-        return this instanceof TiansuluoCoreComponent.TiansuluoEntityInterface ti ? ti.getCore().hasCarriedEggBlock((Animal)this) : false;
-    }
+    boolean hasCarriedEggBlock();
 
-    default void setHasCarriedEggBlock(boolean hasCarriedEggBlock) {
-        if (this instanceof TiansuluoCoreComponent.TiansuluoEntityInterface ti) ti.getCore().setHasCarriedEggBlock((Animal)this, hasCarriedEggBlock);
-    }
+    void setHasCarriedEggBlock(boolean hasCarriedEggBlock);
 
-    default @Nullable BlockPos getCarriedEggBlockTargetPos() {
-        return getEggLayingSupport().getEggBlockTargetPos();
-    }
+    @Nullable BlockPos getCarriedEggBlockTargetPos();
 
-    default void setCarriedEggBlockTargetPos(@Nullable BlockPos pos) {
-        getEggLayingSupport().setEggBlockTargetPos(pos);
-    }
+    void setCarriedEggBlockTargetPos(@Nullable BlockPos pos);
 
-    default int getEggBlockPlacingCounter() {
-        return getEggLayingSupport().getEggBlockPlacingCounter();
-    }
+    int getEggBlockPlacingCounter();
 
-    default void setEggBlockPlacingCounter(int counter) {
-        getEggLayingSupport().setEggBlockPlacingCounter(counter);
-    }
+    void setEggBlockPlacingCounter(int counter);
 
-    default @Nullable UUID getEggBlockAttractedPlayerUuid() {
-        return getEggLayingSupport().getEggBlockPlayerUuid();
-    }
+    @Nullable UUID getEggBlockAttractedPlayerUuid();
 
-    default void setEggBlockAttractedPlayerUuid(@Nullable UUID uuid) {
-        getEggLayingSupport().setEggBlockPlayerUuid(uuid);
-    }
+    void setEggBlockAttractedPlayerUuid(@Nullable UUID uuid);
 
-    TiansuluoCoreComponent.EggLayingSupport getEggLayingSupport();
+    default void setEggBlockAttractedPlayer(@Nullable Player player) {
+        this.setEggBlockAttractedPlayerUuid(player == null ? null : player.getUUID());
+    }
 }

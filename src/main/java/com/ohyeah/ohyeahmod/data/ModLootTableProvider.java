@@ -74,7 +74,8 @@ public class ModLootTableProvider {
         private void generateForSpecies(String speciesId, EntityType<?> type) {
             SpeciesConfig.Loot config = ModSpeciesConfigs.get(speciesId).loot();
             
-            if (!config.enabled() || config.adultDropItemIds().isEmpty()) {
+            // 鲁棒性检查：如果 Loot 配置不存在，或者显式禁用，或者掉落列表为空，则生成空掉落表
+            if (config == null || !config.enabled() || config.adultDropItemIds().isEmpty()) {
                 this.add(type, LootTable.lootTable());
                 return;
             }

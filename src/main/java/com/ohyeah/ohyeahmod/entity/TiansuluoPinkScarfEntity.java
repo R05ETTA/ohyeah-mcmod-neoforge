@@ -2,175 +2,200 @@ package com.ohyeah.ohyeahmod.entity;
 
 import com.ohyeah.ohyeahmod.config.ModSpeciesConfigs;
 import com.ohyeah.ohyeahmod.config.SpeciesConfig;
-import com.ohyeah.ohyeahmod.entity.common.EggLayingSpecies;
-import com.ohyeah.ohyeahmod.entity.tiansuluo.TiansuluoCoreComponent;
-import com.ohyeah.ohyeahmod.sound.bridge.SoundParticipant;
+import com.ohyeah.ohyeahmod.entity.projectile.TiansuluoPinkScarfProjectileEntity;
 import com.ohyeah.ohyeahmod.sound.definition.SoundCue;
-import com.ohyeah.ohyeahmod.sound.definition.SpeciesSoundCatalog;
-import com.ohyeah.ohyeahmod.registry.ModSoundEvents;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
+import com.ohyeah.ohyeahmod.sound.bridge.SpeciesSoundFacade;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * 粉围巾天素罗实体。
- * 特点：远程反击型，支持产卵逻辑，集成组件化核心逻辑。
+ * 天素罗 - 粉围巾。
+ * 擅长远程反击的优雅物种。
  */
-public class TiansuluoPinkScarfEntity extends Animal implements 
-        EggLayingSpecies, 
-        SoundParticipant, 
-        TiansuluoCoreComponent.TiansuluoEntityInterface,
-        RangedAttackMob {
+public class TiansuluoPinkScarfEntity extends AbstractTiansuluoEntity implements RangedAttackMob {
+    public static final float WIDTH = 0.6F;
+    public static final float HEIGHT = 1.2F;
 
-    public static final float WIDTH = 0.7F;
-    public static final float HEIGHT = 1.6F;
+    private enum RetaliationState { IDLE, PENDING_RETALIATION_DECLARE, RETALIATING }
 
-    private static final EntityDataAccessor<Boolean> HAS_CARRIED_EGG_BLOCK = 
-            SynchedEntityData.defineId(TiansuluoPinkScarfEntity.class, EntityDataSerializers.BOOLEAN);
+    private RetaliationState retaliationState = RetaliationState.IDLE;
+    private @Nullable LivingEntity retaliationTarget;
+    private int retaliationTicksRemaining;
+    private int retaliationBurstShotsFired;
+    private int retaliationBurstCooldownTicks;
+    private int retaliationDeclareTicksRemaining;
 
-    private final TiansuluoCoreComponent core = new TiansuluoCoreComponent(HAS_CARRIED_EGG_BLOCK);
-
-    public TiansuluoPinkScarfEntity(EntityType<? extends Animal> entityType, Level level) {
-        super(entityType, level);
+    public TiansuluoPinkScarfEntity(EntityType<? extends Animal> type, Level level) {
+        super(type, level);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        SpeciesConfig config = ModSpeciesConfigs.TIANSULUO_PINK_SCARF;
-        return Animal.createMobAttributes()
+        // 使用动态配置工厂获取初始属性
+        SpeciesConfig config = ModSpeciesConfigs.pinkScarf();
+        return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, config.attributes().maxHealth())
                 .add(Attributes.MOVEMENT_SPEED, config.attributes().movementSpeed())
                 .add(Attributes.FOLLOW_RANGE, config.attributes().followRange());
     }
 
-    public static boolean canSpawn(EntityType<? extends Animal> type, LevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
-        return Animal.checkAnimalSpawnRules(type, level, reason, pos, random);
-    }
-
     @Override
     protected void registerGoals() {
-        SpeciesConfig.Behavior behavior = getSpeciesConfig().behavior();
+        SpeciesConfig config = this.getSpeciesConfig();
         this.goalSelector.addGoal(0, new FloatGoal(this));
 
-        this.goalSelector.addGoal(1, new RangedAttackGoal(this, behavior.projectileAttackGoalSpeed(), 
-                behavior.retaliationBurstIntervalTicks(), (float) behavior.retaliationRange()));
+        // 远程攻击 AI：使用配置定义的参数
+        this.goalSelector.addGoal(1, new RangedAttackGoal(this, config.behavior().projectileAttackGoalSpeed(), config.behavior().retaliationBurstIntervalTicks(), (float) config.behavior().retaliationRange()));
 
-        this.goalSelector.addGoal(2, new TiansuluoCoreComponent.MateForEggBlockGoal(this, behavior.mateGoalSpeed()));
-        this.goalSelector.addGoal(3, new TiansuluoCoreComponent.LayEggBlockGoal(this));
+        // 仅当配置启用了卵块逻辑时，才添加相关繁殖与产卵 Goal
+        if (config.breeding().usesEggBlock()) {
+            this.goalSelector.addGoal(2, new MateForEggBlockGoal(this, config.behavior().mateGoalSpeed()));
+            this.goalSelector.addGoal(3, new LayEggBlockGoal());
+        }
 
-        this.goalSelector.addGoal(4, new TemptGoal(this, behavior.temptSpeed(), this::isFood, false));
-        this.goalSelector.addGoal(5, new FollowParentGoal(this, behavior.followParentSpeed()));
-        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, behavior.wanderSpeed()));
+        this.goalSelector.addGoal(5, new FollowParentGoal(this, config.behavior().followParentSpeed()));        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, config.behavior().wanderSpeed()));
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
     }
 
     @Override
-    public boolean isFood(ItemStack stack) {
-        return core.getInteractionSupport().isBreedingItem(this, stack);
+    public void aiStep() {
+        super.aiStep();
+        if (!this.level().isClientSide) {
+            this.updateRetaliationTarget();
+        }
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        boolean damaged = super.hurt(source, amount);
+        if (damaged && !this.level().isClientSide && source.getEntity() instanceof LivingEntity attacker && attacker != this) {
+            this.rememberRetaliationTarget(attacker);
+        }
+        return damaged;
     }
 
     @Override
     public void performRangedAttack(LivingEntity target, float velocity) {
-        Level level = this.level();
-        com.ohyeah.ohyeahmod.entity.projectile.TiansuluoPinkScarfProjectileEntity projectile = 
-                new com.ohyeah.ohyeahmod.entity.projectile.TiansuluoPinkScarfProjectileEntity(level, this);
+        if (this.retaliationState != RetaliationState.RETALIATING || this.retaliationBurstCooldownTicks > 0) return;
+        
+        SpeciesConfig config = this.getSpeciesConfig();
+        Vec3 muzzlePos = this.getProjectileMuzzlePos();
+        
+        TiansuluoPinkScarfProjectileEntity projectile = new TiansuluoPinkScarfProjectileEntity(this.level(), this);
+        projectile.setPos(muzzlePos.x, muzzlePos.y, muzzlePos.z);
+        projectile.setDamage((float) config.behavior().retaliationProjectileDamage());
+        
+        double targetY = target.getEyeY() - config.behavior().retaliationTargetEyeOffset();
+        double d0 = target.getX() - muzzlePos.x;
+        double d1 = targetY - projectile.getY();
+        double d2 = target.getZ() - muzzlePos.z;
+        double d3 = Math.sqrt(d0 * d0 + d2 * d2) * 0.2F;
+        
+        projectile.shoot(d0, d1 + d3, d2, config.behavior().retaliationProjectileSpeed(), config.behavior().retaliationProjectileDivergence());
+        
+        SpeciesSoundFacade.playCue(this, SoundCue.ATTACK_SHOT, 1.0F, 1.0F);
+        this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.SNOW_GOLEM_SHOOT, this.getSoundSource(), 1.0F, 0.4F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
+        this.level().addFreshEntity(projectile);
+        
+        this.retaliationBurstShotsFired++;
+        if (this.retaliationBurstShotsFired >= config.behavior().retaliationBurstShots()) {
+            this.retaliationBurstShotsFired = 0;
+            this.retaliationBurstCooldownTicks = config.behavior().retaliationBurstCooldownTicks();
+        }
+    }
 
-        double d0 = target.getX() - this.getX();
-        double d1 = target.getY(0.3333333333333333D) - projectile.getY();
-        double d2 = target.getZ() - this.getZ();
-        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+    private Vec3 getProjectileMuzzlePos() {
+        Vec3 forward = Vec3.directionFromRotation(0.0F, this.getYHeadRot()).normalize();
+        double horizontalOffset = this.getBbWidth() * 0.5D + this.getSpeciesConfig().behavior().projectileFrontOffset();
+        return new Vec3(this.getX() + forward.x * horizontalOffset, this.getY() + this.getBbHeight() * this.getSpeciesConfig().behavior().projectileMuzzleHeightRatio(), this.getZ() + forward.z * horizontalOffset);
+    }
 
-        projectile.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 12.0F);
-        this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0F, 0.4F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-        level.addFreshEntity(projectile);
+    private void rememberRetaliationTarget(LivingEntity attacker) {
+        SpeciesConfig config = this.getSpeciesConfig();
+        int memoryTicks = config.behavior().retaliationMemoryTicks();
+        
+        // 只有配置了反击记忆时长（非被动生物）才启动状态机
+        if (memoryTicks <= 0) return;
 
-        core.tryPlayVoice(this, SoundCue.ATTACK_SHOT);
+        this.retaliationTarget = attacker;
+        this.retaliationTicksRemaining = memoryTicks;
+        this.setTarget(attacker);
+        
+        if (this.retaliationState == RetaliationState.IDLE) {
+            this.retaliationState = RetaliationState.PENDING_RETALIATION_DECLARE;
+            this.retaliationDeclareTicksRemaining = 0;
+        }
+    }
+
+    private void updateRetaliationTarget() {
+        SpeciesConfig config = this.getSpeciesConfig();
+        if (this.retaliationBurstCooldownTicks > 0) this.retaliationBurstCooldownTicks--;
+        if (this.retaliationTicksRemaining > 0) this.retaliationTicksRemaining--;
+        
+        LivingEntity currentTarget = this.retaliationTarget;
+        if (this.isValidRetaliationTarget(currentTarget)) {
+            this.setTarget(currentTarget);
+            this.updateRetaliationState(currentTarget);
+            return;
+        }
+        this.clearRetaliationState(true);
+    }
+
+    private void updateRetaliationState(LivingEntity target) {
+        if (this.retaliationState == RetaliationState.PENDING_RETALIATION_DECLARE) {
+            if (this.retaliationDeclareTicksRemaining > 0) {
+                this.retaliationDeclareTicksRemaining--;
+                if (this.retaliationDeclareTicksRemaining <= 0) this.retaliationState = RetaliationState.RETALIATING;
+                return;
+            }
+            if (SpeciesSoundFacade.playCue(this, SoundCue.ATTACK_DECLARE, 1.0F, 1.0F)) {
+                this.retaliationDeclareTicksRemaining = this.getSpeciesConfig().behavior().attackDeclareDurationTicks();
+            } else {
+                this.retaliationState = RetaliationState.RETALIATING;
+            }
+        }
+    }
+
+    private void clearRetaliationState(boolean playEndVoice) {
+        boolean shouldPlayEndVoice = playEndVoice && this.retaliationState == RetaliationState.RETALIATING;
+        this.retaliationTarget = null;
+        this.retaliationState = RetaliationState.IDLE;
+        this.retaliationBurstShotsFired = 0;
+        this.retaliationBurstCooldownTicks = 0;
+        if (this.getTarget() != null) this.setTarget(null);
+        if (shouldPlayEndVoice) SpeciesSoundFacade.playCue(this, SoundCue.ATTACK_END, 1.0F, 1.0F);
+    }
+
+    private boolean isValidRetaliationTarget(@Nullable LivingEntity candidate) {
+        if (candidate == null || this.retaliationTicksRemaining <= 0) return false;
+        if (!candidate.isAlive()) return false;
+        if (this.distanceToSqr(candidate) > Mth.square(this.getSpeciesConfig().behavior().retaliationRange())) return false;
+        return this.getSensing().hasLineOfSight(candidate);
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        core.defineSynchedData(builder);
-    }
-
-    @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        core.addAdditionalSaveData(tag, this);
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        core.readAdditionalSaveData(tag, this);
-    }
-
-    @Override
-    public void aiStep() {
-        super.aiStep();
-        core.tick(this);
-    }
-
-    @Override
-    public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        InteractionResult result = core.handleInteract(this, player, hand, getSpeciesConfig());
-        if (result != InteractionResult.PASS) return result;
-        return super.mobInteract(player, hand);
-    }
-
-    @Override
-    public @Nullable AgeableMob getBreedOffspring(ServerLevel level, AgeableMob other) {
+    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob other) {
         return null;
     }
 
     @Override
     public SpeciesConfig getSpeciesConfig() {
-        return ModSpeciesConfigs.TIANSULUO_PINK_SCARF;
+        return ModSpeciesConfigs.pinkScarf();
     }
 
-    @Override
-    public TiansuluoCoreComponent getCore() {
-        return core;
-    }
-
-    @Override
-    public TiansuluoCoreComponent.EggLayingSupport getEggLayingSupport() {
-        return core.getEggLayingSupport();
-    }
-
-    @Override
-    public String soundSpeciesId() {
-        return getSpeciesConfig().speciesId();
-    }
-
-    @Override
-    public SpeciesSoundCatalog soundCatalog() {
-        return SpeciesSoundCatalog.PINK_SCARF;
-    }
-
-    @Override
-    public boolean isSilent() {
-        return super.isSilent() || core.isSoundSilenced();
+    public static boolean canSpawn(EntityType<TiansuluoPinkScarfEntity> type, net.minecraft.world.level.LevelAccessor level, MobSpawnType spawnType, net.minecraft.core.BlockPos pos, net.minecraft.util.RandomSource random) {
+        return level.getBlockState(pos.below()).isSolidRender(level, pos.below());
     }
 }

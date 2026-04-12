@@ -1,47 +1,68 @@
 package com.ohyeah.ohyeahmod.entity.logic;
 
-import com.ohyeah.ohyeahmod.OhYeah;
 import com.ohyeah.ohyeahmod.config.ModConfig;
-import com.ohyeah.ohyeahmod.entity.tiansuluo.spawn.TiansuluoPinkScarfBedWakeSpawner;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerWakeUpEvent;
 
-@EventBusSubscriber(modid = OhYeah.MODID)
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 public final class SleepWakeGameplayCoordinator {
     private static final Map<String, SleepWakeSpeciesHandler> HANDLERS = new LinkedHashMap<>();
 
     static {
-        register(TiansuluoPinkScarfBedWakeSpawner.INSTANCE);
+        register(com.ohyeah.ohyeahmod.entity.tiansuluo.spawn.TiansuluoPinkScarfBedWakeSpawner.INSTANCE);
     }
 
     private SleepWakeGameplayCoordinator() {
     }
 
-    private static void register(SleepWakeSpeciesHandler handler) {
+    public static void register(SleepWakeSpeciesHandler handler) {
         HANDLERS.put(handler.speciesId(), handler);
     }
 
-    @SubscribeEvent
-    public static void onPlayerWakeUp(PlayerWakeUpEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
-            return;
+    public static boolean shouldQueueSpawn(ServerPlayer player) {
+        if (player == null || !ModConfig.SLEEP_WAKE_ENABLED.get()) {
+            return false;
         }
-        if (!ModConfig.SLEEP_WAKE_ENABLED.get()) {
+        for (SleepWakeSpeciesHandler handler : getConfiguredHandlers()) {
+            if (handler.shouldQueueSpawn(player)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void trySpawnAfterWake(ServerPlayer player, BlockPos bedPos) {
+        if (player == null || bedPos == null || !ModConfig.SLEEP_WAKE_ENABLED.get()) {
             return;
         }
 
-        BlockPos origin = player.blockPosition();
-        for (String speciesId : ModConfig.SLEEP_WAKE_SPECIES.get()) {
-            SleepWakeSpeciesHandler handler = HANDLERS.get(speciesId);
-            if (handler != null && handler.canSpawnAt(player, origin)) {
-                handler.trySpawn(player, origin);
-                return;
+        List<SleepWakeSpeciesHandler> candidates = new ArrayList<>();
+        for (SleepWakeSpeciesHandler handler : getConfiguredHandlers()) {
+            if (handler.canSpawnAt(player, bedPos)) {
+                candidates.add(handler);
             }
         }
+        if (candidates.isEmpty()) {
+            return;
+        }
+
+        SleepWakeSpeciesHandler selected = candidates.get(player.getRandom().nextInt(candidates.size()));
+        selected.trySpawn(player, bedPos);
+    }
+
+    private static List<SleepWakeSpeciesHandler> getConfiguredHandlers() {
+        List<SleepWakeSpeciesHandler> handlers = new ArrayList<>();
+        List<? extends String> enabledSpecies = ModConfig.SLEEP_WAKE_SPECIES.get();
+        for (String speciesId : enabledSpecies) {
+            SleepWakeSpeciesHandler handler = HANDLERS.get(speciesId);
+            if (handler != null) {
+                handlers.add(handler);
+            }
+        }
+        return handlers;
     }
 }

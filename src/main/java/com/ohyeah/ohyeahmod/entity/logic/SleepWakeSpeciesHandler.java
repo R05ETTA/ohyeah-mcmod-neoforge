@@ -6,7 +6,9 @@ import net.minecraft.server.level.ServerPlayer;
 public interface SleepWakeSpeciesHandler {
     String speciesId();
 
-    boolean canSpawnAt(ServerPlayer player, BlockPos origin);
+    boolean shouldQueueSpawn(ServerPlayer player);
 
-    void trySpawn(ServerPlayer player, BlockPos origin);
+    boolean canSpawnAt(ServerPlayer player, BlockPos bedPos);
+
+    void trySpawn(ServerPlayer player, BlockPos bedPos);
 }

@@ -1,5 +1,6 @@
 package com.ohyeah.ohyeahmod.sound.bridge;
 
+import com.ohyeah.ohyeahmod.config.SpeciesConfig;
 import com.ohyeah.ohyeahmod.sound.definition.SoundCue;
 import com.ohyeah.ohyeahmod.sound.emission.SoundEmissionService;
 import com.ohyeah.ohyeahmod.sound.policy.EntitySoundContext;
@@ -18,8 +19,11 @@ public final class SpeciesSoundFacade {
     }
 
     public static @Nullable SoundEvent resolveVanillaCue(SoundParticipant participant, SoundCue cue) {
+        SpeciesConfig.Voice voice = participant.soundVoiceConfig();
+        if (voice == null) return null;
+
         if (cue == SoundCue.AMBIENT) {
-            int chance = participant.soundVoiceConfig().rareAmbientChance();
+            int chance = voice.rareAmbientChance();
             if (chance > 0 && participant.soundEntity().getRandom().nextInt(100) < chance) {
                 cue = SoundCue.RARE_CALL;
             }
@@ -42,8 +46,11 @@ public final class SpeciesSoundFacade {
     }
 
     public static boolean playCue(SoundParticipant participant, SoundCue cue, float volume, float pitch) {
+        SpeciesConfig.Voice voice = participant.soundVoiceConfig();
+        if (voice == null) return false;
+
         if (cue == SoundCue.AMBIENT) {
-            int chance = participant.soundVoiceConfig().rareAmbientChance();
+            int chance = voice.rareAmbientChance();
             if (chance > 0 && participant.soundEntity().getRandom().nextInt(100) < chance) {
                 cue = SoundCue.RARE_CALL;
             }
