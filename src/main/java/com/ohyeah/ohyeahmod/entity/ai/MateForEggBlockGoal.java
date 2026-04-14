@@ -1,23 +1,23 @@
 package com.ohyeah.ohyeahmod.entity.ai;
 
 import com.ohyeah.ohyeahmod.entity.common.EggLayingSpecies;
-import com.ohyeah.ohyeahmod.sound.bridge.SoundParticipant;
-import com.ohyeah.ohyeahmod.sound.bridge.SpeciesSoundFacade;
-import com.ohyeah.ohyeahmod.sound.definition.SoundCue;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.animal.Animal;
 
-public class MateForEggBlockGoal<T extends Animal & EggLayingSpecies & SoundParticipant> extends BreedGoal {
+public class MateForEggBlockGoal<T extends Animal & EggLayingSpecies> extends BreedGoal {
     private final T tiansuluo;
     private final String carriedMessageKey;
+    private final SoundEvent breedSuccessSound;
 
-    public MateForEggBlockGoal(T tiansuluo, double speed, String carriedMessageKey) {
+    public MateForEggBlockGoal(T tiansuluo, double speed, String carriedMessageKey, SoundEvent breedSuccessSound) {
         super(tiansuluo, speed);
         this.tiansuluo = tiansuluo;
         this.carriedMessageKey = carriedMessageKey;
+        this.breedSuccessSound = breedSuccessSound;
     }
 
     @Override
@@ -36,7 +36,12 @@ public class MateForEggBlockGoal<T extends Animal & EggLayingSpecies & SoundPart
         if (player != null) {
             player.displayClientMessage(Component.translatable(this.carriedMessageKey), true);
         }
-        SpeciesSoundFacade.playCue(this.tiansuluo, SoundCue.BREED_SUCCESS, 1.0F, 1.0F);
+        
+        // 使用原生的播音方法
+        if (this.breedSuccessSound != null) {
+            this.animal.playSound(this.breedSuccessSound, 1.0F, 1.0F);
+        }
+        
         this.animal.setAge(6000);
         this.partner.setAge(6000);
         this.animal.resetLove();

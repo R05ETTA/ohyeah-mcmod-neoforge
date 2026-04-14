@@ -1,13 +1,14 @@
 package com.ohyeah.ohyeahmod.entity;
 
 import com.ohyeah.ohyeahmod.registry.ModEntityTypes;
-import com.ohyeah.ohyeahmod.sound.definition.SoundCue;
-import com.ohyeah.ohyeahmod.sound.definition.SpeciesSoundCatalog;
+import com.ohyeah.ohyeahmod.registry.ModSoundEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -18,17 +19,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * 酥虾实体 (Suxia)。
  * <p>
  * 水生/两栖环境生物。已应用 "内部 Procedure 代理" 与 "数值控制台" 架构对齐重构。
  */
-public class SuxiaEntity extends Animal implements com.ohyeah.ohyeahmod.sound.bridge.SoundParticipant {
+public class SuxiaEntity extends Animal {
 
     // ====================================================================================
     // [数值控制台] 统一管理所有行为与基础参数
@@ -119,25 +117,29 @@ public class SuxiaEntity extends Animal implements com.ohyeah.ohyeahmod.sound.br
     }
 
     // ====================================================================================
-    // [接口实现] 音效系统 (SoundParticipant)
-    // 酥虾目前是“哑巴生物”（isVoiceEnabled = false），此区为防御性实现。
+    // [原生音效重写]
     // ====================================================================================
 
-    @Override public String soundSpeciesId() { return SPECIES_ID; }
-    @Override public SpeciesSoundCatalog soundCatalog() { return SpeciesSoundCatalog.suxia(); }
-    @Override public Set<String> playedSoundCues() { return Collections.emptySet(); }
-    @Override public boolean isSoundSilenced(SoundCue cue) { return false; }
-    
-    @Override public boolean isVoiceEnabled() { return false; }
-    @Override public boolean isCueDisabled(SoundCue cue) { return true; }
-    @Override public boolean allowsCueWhileSilenced(SoundCue cue) { return false; }
-    @Override public boolean enablePipeline() { return false; }
-    @Override public boolean enableVanilla() { return false; }
-    @Override public Set<String> vanillaCues() { return Collections.emptySet(); }
-    @Override public boolean enableLimiter() { return false; }
-    @Override public int ambientIntervalTicks() { return AMBIENT_INTERVAL; }
-    @Override public int ambientRandomnessTicks() { return 0; }
-    @Override public int rareAmbientChance() { return 0; }
-    @Override public int intervalTicks(SoundCue cue) { return 20; }
-    @Override public Map<String, Integer> voiceOverrides() { return Collections.emptyMap(); }
+    @Override
+    @Nullable
+    protected SoundEvent getAmbientSound() {
+        return ModSoundEvents.SUXIA_AMBIENT.get();
+    }
+
+    @Override
+    @Nullable
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return ModSoundEvents.SUXIA_HURT.get();
+    }
+
+    @Override
+    @Nullable
+    protected SoundEvent getDeathSound() {
+        return ModSoundEvents.SUXIA_DEATH.get();
+    }
+
+    @Override
+    public int getAmbientSoundInterval() {
+        return AMBIENT_INTERVAL; // 6000 ticks
+    }
 }
