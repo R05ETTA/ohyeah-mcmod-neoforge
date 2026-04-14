@@ -9,6 +9,7 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
 
 /**
  * 语言文件生成器 - 自动化翻译系统
+ * 确保中英文拥有绝对对等的词条。
  */
 public abstract class ModLangProvider extends LanguageProvider {
 
@@ -45,7 +46,7 @@ public abstract class ModLangProvider extends LanguageProvider {
             add(ModItems.SUXIA_EGG.get().getDescriptionId() + ".desc_2", "Right-click to spawn a Suxia.");
 
             addItem(ModItems.XIAMI_HUHU, "Xiami Huhu");
-            addItem(ModItems.CHIPS, "Chips");
+            addItem(ModItems.CHIPS, "Potato Chips");
 
             // Blocks
             addBlock(ModBlocks.TIANSULUO_PINK_SCARF_LUANLUAN_BLOCK, "Pink Scarf Luanluan Block");
@@ -55,10 +56,10 @@ public abstract class ModLangProvider extends LanguageProvider {
             add("itemGroup.ohyeah.main", "Oh Yeah!");
 
             // Messages - Pink Scarf
-            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_carried", "Tiansuluo is carrying a Luanluan Block and looking for a place to put it...");
-            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_placed", "Tiansuluo placed a Luanluan Block. Total blocks: %s");
-            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_hatch_progress", "Luanluan Block hatch progress: Stage %s / %s");
-            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_hatched", "Luanluan Block hatched! Spawned babies: %s");
+            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_carried", "Pink Scarf Tiansuluo is carrying a Luanluan Block and looking for a place to put it...");
+            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_placed", "Pink Scarf Tiansuluo placed a Luanluan Block. Total blocks: %s");
+            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_hatch_progress", "Pink Scarf Luanluan hatch progress: Stage %s / %s");
+            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_hatched", "Pink Scarf Luanluan hatched! Spawned babies: %s");
             add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_broken", "You crushed a Pink Scarf Luanluan Block!");
 
             // Messages - Battle Face
@@ -68,28 +69,46 @@ public abstract class ModLangProvider extends LanguageProvider {
             add("message.ohyeah.tiansuluo_battle_face.luanluan_block_hatched", "Battle Face Luanluan hatched! Spawned: %s");
             add("message.ohyeah.tiansuluo_battle_face.luanluan_block_broken", "You crushed a Battle Face Luanluan Block!");
 
-            // Subtitles
-            add("subtitles.ohyeah.tiansuluo.ambient", "Tiansuluo murmurs softly");
-            add("subtitles.ohyeah.tiansuluo.rare_call", "Tiansuluo makes a rare call");
-            add("subtitles.ohyeah.tiansuluo.hurt", "Tiansuluo cries out");
-            add("subtitles.ohyeah.tiansuluo.death", "Tiansuluo collapses");
-            add("subtitles.ohyeah.tiansuluo.eat", "Tiansuluo is chewing");
-            add("subtitles.ohyeah.tiansuluo.eat_favorite", "Tiansuluo happily chews favorite food");
-            add("subtitles.ohyeah.tiansuluo.tempted", "Tiansuluo is attracted");
-            add("subtitles.ohyeah.tiansuluo.notice_player", "Tiansuluo notices someone");
-            add("subtitles.ohyeah.tiansuluo.spawn", "Tiansuluo appears");
-            add("subtitles.ohyeah.tiansuluo.breed_success", "Tiansuluo chirps happily");
-            add("subtitles.ohyeah.tiansuluo.carry_egg", "Tiansuluo shows off its Luanluan");
-            add("subtitles.ohyeah.tiansuluo.attack_shot", "Tiansuluo fires a Luanluan");
-            add("subtitles.ohyeah.tiansuluo.attack_end", "Tiansuluo ends counterattack");
-            add("subtitles.ohyeah.tiansuluo.attack_declare", "Tiansuluo prepares for battle");
-            add("subtitles.ohyeah.tiansuluo.grow_up", "Little Tiansuluo grows up");
-            add("subtitles.ohyeah.tiansuluo.shear_react", "Tiansuluo protests being sheared");
+            // Subtitles - Tiansuluo (Battle Face)
+            add("subtitles.ohyeah.tiansuluo.ambient", "Battle Face Tiansuluo murmurs softly");
+            add("subtitles.ohyeah.tiansuluo.rare_call", "Battle Face Tiansuluo makes a rare call");
+            add("subtitles.ohyeah.tiansuluo.hurt", "Battle Face Tiansuluo cries out");
+            add("subtitles.ohyeah.tiansuluo.death", "Battle Face Tiansuluo collapses");
+            add("subtitles.ohyeah.tiansuluo.eat", "Battle Face Tiansuluo is chewing");
+            add("subtitles.ohyeah.tiansuluo.eat_favorite", "Battle Face Tiansuluo happily chews favorite food");
+            add("subtitles.ohyeah.tiansuluo.tempted", "Battle Face Tiansuluo is attracted");
+            add("subtitles.ohyeah.tiansuluo.notice_player", "Battle Face Tiansuluo notices someone");
+            add("subtitles.ohyeah.tiansuluo.spawn", "Battle Face Tiansuluo appears");
+            add("subtitles.ohyeah.tiansuluo.breed_success", "Battle Face Tiansuluo chirps happily");
+            add("subtitles.ohyeah.tiansuluo.carry_egg", "Battle Face Tiansuluo shows off its Luanluan");
+            add("subtitles.ohyeah.tiansuluo.attack_shot", "Battle Face Tiansuluo pounces!");
+            add("subtitles.ohyeah.tiansuluo.attack_end", "Battle Face Tiansuluo ends pounce");
+            add("subtitles.ohyeah.tiansuluo.attack_declare", "Battle Face Tiansuluo roars for battle");
+            add("subtitles.ohyeah.tiansuluo.grow_up", "Little Battle Face Tiansuluo grows up");
+            add("subtitles.ohyeah.tiansuluo.shear_react", "Battle Face Tiansuluo protests being sheared");
 
+            // Subtitles - Tiansuluo (Pink Scarf)
+            add("subtitles.ohyeah.tiansuluo_ps.ambient", "Pink Scarf Tiansuluo murmurs softly");
+            add("subtitles.ohyeah.tiansuluo_ps.rare_call", "Pink Scarf Tiansuluo makes a rare call");
+            add("subtitles.ohyeah.tiansuluo_ps.hurt", "Pink Scarf Tiansuluo cries out");
+            add("subtitles.ohyeah.tiansuluo_ps.death", "Pink Scarf Tiansuluo collapses");
+            add("subtitles.ohyeah.tiansuluo_ps.eat", "Pink Scarf Tiansuluo is chewing");
+            add("subtitles.ohyeah.tiansuluo_ps.eat_favorite", "Pink Scarf Tiansuluo happily chews favorite food");
+            add("subtitles.ohyeah.tiansuluo_ps.tempted", "Pink Scarf Tiansuluo is attracted");
+            add("subtitles.ohyeah.tiansuluo_ps.notice_player", "Pink Scarf Tiansuluo notices someone");
+            add("subtitles.ohyeah.tiansuluo_ps.spawn", "Pink Scarf Tiansuluo appears");
+            add("subtitles.ohyeah.tiansuluo_ps.breed_success", "Pink Scarf Tiansuluo chirps happily");
+            add("subtitles.ohyeah.tiansuluo_ps.carry_egg", "Pink Scarf Tiansuluo shows off its Luanluan");
+            add("subtitles.ohyeah.tiansuluo_ps.attack_shot", "Pink Scarf Tiansuluo fires a projectile!");
+            add("subtitles.ohyeah.tiansuluo_ps.attack_end", "Pink Scarf Tiansuluo stops firing");
+            add("subtitles.ohyeah.tiansuluo_ps.attack_declare", "Pink Scarf Tiansuluo prepares to shoot");
+            add("subtitles.ohyeah.tiansuluo_ps.grow_up", "Little Pink Scarf Tiansuluo grows up");
+            add("subtitles.ohyeah.tiansuluo_ps.shear_react", "Pink Scarf Tiansuluo protests being sheared");
+
+            // Subtitles - Suxia
             add("subtitles.ohyeah.suxia.ambient", "Suxia chirps softly");
             add("subtitles.ohyeah.suxia.hurt", "Suxia is hurt");
             add("subtitles.ohyeah.suxia.death", "Suxia dies");
-            add("subtitles.ohyeah.suxia.squirt", "Suxia squirts ink");
         }
     }
 
@@ -103,12 +122,12 @@ public abstract class ModLangProvider extends LanguageProvider {
 
         @Override
         protected void addTranslations() {
-            // 实名
+            // Entities
             addEntityType(ModEntityTypes.TIANSULUO_PINK_SCARF, "天素罗_粉围巾");
             addEntityType(ModEntityTypes.TIANSULUO_BATTLE_FACE, "天素罗_战斗脸");
             addEntityType(ModEntityTypes.SUXIA, "素虾");
 
-            // 物品
+            // Items
             addItem(ModItems.TIANSULUO_PINK_SCARF_EGG, "栾栾_粉围巾");
             add(ModItems.TIANSULUO_PINK_SCARF_EGG.get().getDescriptionId() + ".desc", "天素罗_粉围巾的特殊栾栾");
             add(ModItems.TIANSULUO_PINK_SCARF_EGG.get().getDescriptionId() + ".desc_2", "成年天素罗_粉围巾掉落，右键生成天素罗_粉围巾");
@@ -124,49 +143,67 @@ public abstract class ModLangProvider extends LanguageProvider {
             addItem(ModItems.XIAMI_HUHU, "虾米糊糊");
             addItem(ModItems.CHIPS, "薯片");
 
-            // 方块
+            // Blocks
             addBlock(ModBlocks.TIANSULUO_PINK_SCARF_LUANLUAN_BLOCK, "天素罗_粉围巾栾栾块");
             addBlock(ModBlocks.TIANSULUO_BATTLE_FACE_LUANLUAN_BLOCK, "天素罗_战斗脸栾栾块");
 
-            // 创造栏
+            // Creative Tab
             add("itemGroup.ohyeah.main", "Oh Yeah!");
 
-            // 消息提示 - 粉围巾
+            // Messages - Pink Scarf
             add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_carried", "天素罗_粉围巾已进入带蛋状态，会在你附近寻找位置放置栾栾块");
             add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_placed", "天素罗_粉围巾已放置栾栾块，当前块数：%s");
-            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_hatch_progress", "栾栾块孵化进度：第 %s / %s 阶段");
-            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_hatched", "栾栾块已孵化，诞生幼体数量：%s");
+            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_hatch_progress", "粉围巾栾栾块孵化进度：第 %s / %s 阶段");
+            add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_hatched", "粉围巾栾栾块已孵化，诞生幼体数量：%s");
             add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_broken", "你踩碎了一枚天素罗_粉围巾栾栾块");
 
-            // 消息提示 - 战斗脸
+            // Messages - Battle Face
             add("message.ohyeah.tiansuluo_battle_face.luanluan_block_carried", "天素罗_战斗脸已进入带蛋状态，准备放下栾栾块！");
             add("message.ohyeah.tiansuluo_battle_face.luanluan_block_placed", "天素罗_战斗脸已放置栾栾块，当前块数：%s");
             add("message.ohyeah.tiansuluo_battle_face.luanluan_block_hatch_progress", "战斗脸栾栾块孵化进度：第 %s / %s 阶段");
             add("message.ohyeah.tiansuluo_battle_face.luanluan_block_hatched", "战斗脸栾栾块已孵化，诞生幼体数量：%s");
             add("message.ohyeah.tiansuluo_battle_face.luanluan_block_broken", "你踩碎了一枚天素罗_战斗脸栾栾块");
 
-            // 字幕
-            add("subtitles.ohyeah.tiansuluo.ambient", "天素罗轻声呢喃");
-            add("subtitles.ohyeah.tiansuluo.rare_call", "天素罗发出稀有呼唤");
-            add("subtitles.ohyeah.tiansuluo.hurt", "天素罗发出痛叫");
-            add("subtitles.ohyeah.tiansuluo.death", "天素罗瘫软倒下");
-            add("subtitles.ohyeah.tiansuluo.eat", "天素罗在咀嚼");
-            add("subtitles.ohyeah.tiansuluo.eat_favorite", "天素罗开心地吃着最爱的食物");
-            add("subtitles.ohyeah.tiansuluo.tempted", "天素罗被吸引了");
-            add("subtitles.ohyeah.tiansuluo.notice_player", "天素罗注意到了谁");
-            add("subtitles.ohyeah.tiansuluo.spawn", "天素罗出现了");
-            add("subtitles.ohyeah.tiansuluo.breed_success", "天素罗发出欢快叫声");
-            add("subtitles.ohyeah.tiansuluo.carry_egg", "天素罗炫耀地展示栾栾");
-            add("subtitles.ohyeah.tiansuluo.attack_shot", "天素罗喷射栾栾");
-            add("subtitles.ohyeah.tiansuluo.attack_end", "天素罗结束反击");
-            add("subtitles.ohyeah.tiansuluo.attack_declare", "天素罗准备战斗");
-            add("subtitles.ohyeah.tiansuluo.grow_up", "小天素罗长大了");
-            add("subtitles.ohyeah.tiansuluo.shear_react", "天素罗抗议剪毛");
+            // Subtitles - Tiansuluo (Battle Face)
+            add("subtitles.ohyeah.tiansuluo.ambient", "天素罗_战斗脸轻声呢喃");
+            add("subtitles.ohyeah.tiansuluo.rare_call", "天素罗_战斗脸发出稀有呼唤");
+            add("subtitles.ohyeah.tiansuluo.hurt", "天素罗_战斗脸发出痛叫");
+            add("subtitles.ohyeah.tiansuluo.death", "天素罗_战斗脸瘫软倒下");
+            add("subtitles.ohyeah.tiansuluo.eat", "天素罗_战斗脸在咀嚼");
+            add("subtitles.ohyeah.tiansuluo.eat_favorite", "天素罗_战斗脸开心地吃着最爱的食物");
+            add("subtitles.ohyeah.tiansuluo.tempted", "天素罗_战斗脸被吸引了");
+            add("subtitles.ohyeah.tiansuluo.notice_player", "天素罗_战斗脸注意到了谁");
+            add("subtitles.ohyeah.tiansuluo.spawn", "天素罗_战斗脸出现了");
+            add("subtitles.ohyeah.tiansuluo.breed_success", "天素罗_战斗脸发出欢快叫声");
+            add("subtitles.ohyeah.tiansuluo.carry_egg", "天素罗_战斗脸炫耀地展示栾栾");
+            add("subtitles.ohyeah.tiansuluo.attack_shot", "天素罗_战斗脸发起了飞扑！");
+            add("subtitles.ohyeah.tiansuluo.attack_end", "天素罗_战斗脸结束了扑击");
+            add("subtitles.ohyeah.tiansuluo.attack_declare", "天素罗_战斗脸发出战斗怒吼");
+            add("subtitles.ohyeah.tiansuluo.grow_up", "小天素罗_战斗脸长大了");
+            add("subtitles.ohyeah.tiansuluo.shear_react", "天素罗_战斗脸抗议剪毛");
 
+            // Subtitles - Tiansuluo (Pink Scarf)
+            add("subtitles.ohyeah.tiansuluo_ps.ambient", "天素罗_粉围巾轻声呢喃");
+            add("subtitles.ohyeah.tiansuluo_ps.rare_call", "天素罗_粉围巾发出稀有呼唤");
+            add("subtitles.ohyeah.tiansuluo_ps.hurt", "天素罗_粉围巾发出痛叫");
+            add("subtitles.ohyeah.tiansuluo_ps.death", "天素罗_粉围巾瘫软倒下");
+            add("subtitles.ohyeah.tiansuluo_ps.eat", "天素罗_粉围巾在咀嚼");
+            add("subtitles.ohyeah.tiansuluo_ps.eat_favorite", "天素罗_粉围巾开心地吃着最爱的食物");
+            add("subtitles.ohyeah.tiansuluo_ps.tempted", "天素罗_粉围巾被吸引了");
+            add("subtitles.ohyeah.tiansuluo_ps.notice_player", "天素罗_粉围巾注意到了谁");
+            add("subtitles.ohyeah.tiansuluo_ps.spawn", "天素罗_粉围巾出现了");
+            add("subtitles.ohyeah.tiansuluo_ps.breed_success", "天素罗_粉围巾发出欢快叫声");
+            add("subtitles.ohyeah.tiansuluo_ps.carry_egg", "天素罗_粉围巾炫耀地展示栾栾");
+            add("subtitles.ohyeah.tiansuluo_ps.attack_shot", "天素罗_粉围巾喷射了光波！");
+            add("subtitles.ohyeah.tiansuluo_ps.attack_end", "天素罗_粉围巾停止了射击");
+            add("subtitles.ohyeah.tiansuluo_ps.attack_declare", "天素罗_粉围巾准备发射弹幕");
+            add("subtitles.ohyeah.tiansuluo_ps.grow_up", "小天素罗_粉围巾长大了");
+            add("subtitles.ohyeah.tiansuluo_ps.shear_react", "天素罗_粉围巾抗议剪毛");
+
+            // Subtitles - Suxia
             add("subtitles.ohyeah.suxia.ambient", "素虾轻轻漫游");
             add("subtitles.ohyeah.suxia.hurt", "素虾受伤了");
             add("subtitles.ohyeah.suxia.death", "素虾倒下了");
-            add("subtitles.ohyeah.suxia.squirt", "素虾喷出墨汁");
         }
     }
 }

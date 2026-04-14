@@ -1,19 +1,17 @@
 package com.ohyeah.ohyeahmod.data;
 
-import com.ohyeah.ohyeahmod.entity.SuxiaEntity;
-import com.ohyeah.ohyeahmod.entity.TiansuluoBattleFaceEntity;
-import com.ohyeah.ohyeahmod.entity.TiansuluoPinkScarfEntity;
 import com.ohyeah.ohyeahmod.registry.ModBlocks;
 import com.ohyeah.ohyeahmod.registry.ModEntityTypes;
+import com.ohyeah.ohyeahmod.registry.ModItems;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.EntityLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -27,6 +25,9 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+/**
+ * 战利品表数据生成器。
+ */
 public final class ModLootTableProvider {
     public static LootTableProvider create(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         return new LootTableProvider(output, Set.of(), List.of(
@@ -62,17 +63,18 @@ public final class ModLootTableProvider {
 
         @Override
         public void generate() {
-            generateForSpecies(ModEntityTypes.TIANSULUO_PINK_SCARF.get(), TiansuluoPinkScarfEntity.FOOD_FAVORITE); // 示例：掉落喜爱食物
-            generateForSpecies(ModEntityTypes.TIANSULUO_BATTLE_FACE.get(), TiansuluoBattleFaceEntity.FOOD_FAVORITE);
-            generateForSpecies(ModEntityTypes.SUXIA.get(), SuxiaEntity.ADULT_LOOT_ITEMS);
+            // 实体掉落配置（直接引用 Item 对象，而非硬编码字符串）
+            generateForSpecies(ModEntityTypes.TIANSULUO_PINK_SCARF.get(), List.of(Items.CAKE, ModItems.CHIPS.get()));
+            generateForSpecies(ModEntityTypes.TIANSULUO_BATTLE_FACE.get(), List.of(Items.CAKE, ModItems.CHIPS.get()));
+            generateForSpecies(ModEntityTypes.SUXIA.get(), List.of(Items.COD));
         }
 
-        private void generateForSpecies(EntityType<?> type, List<String> lootItems) {
+        private void generateForSpecies(EntityType<?> type, List<Item> lootItems) {
             LootTable.Builder builder = LootTable.lootTable();
             LootPool.Builder pool = LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F));
             
-            for (String itemId : lootItems) {
-                pool.add(LootItem.lootTableItem(BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId))));
+            for (Item item : lootItems) {
+                pool.add(LootItem.lootTableItem(item));
             }
             
             this.add(type, builder.withPool(pool));
