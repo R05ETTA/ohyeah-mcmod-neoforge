@@ -1,7 +1,6 @@
 package com.ohyeah.ohyeahmod.data;
 
 import com.ohyeah.ohyeahmod.OhYeah;
-import com.ohyeah.ohyeahmod.config.SpeciesConfig;
 import com.ohyeah.ohyeahmod.worldgen.ModEntityBiomeModifiers;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -28,14 +27,13 @@ public class ModBiomeTagsProvider extends BiomeTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         for (ModEntityBiomeModifiers.NaturalSpawnPlan plan : ModEntityBiomeModifiers.naturalSpawns()) {
-            SpeciesConfig.Spawn config = plan.spawnConfig();
-            if (!config.enabled() || config.biomes().isEmpty()) continue;
+            if (plan.biomes().isEmpty()) continue;
 
             // 创建物种专用的生成 Tag: ohyeah:has_spawn_<species_id>
-            TagKey<Biome> speciesTag = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OhYeah.MODID, "has_spawn_" + plan.entityId()));
+            TagKey<Biome> speciesTag = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OhYeah.MODID, "has_spawn_" + plan.speciesId()));
             TagAppender<Biome> appender = tag(speciesTag);
 
-            for (String biomeStr : config.biomes()) {
+            for (String biomeStr : plan.biomes()) {
                 if (biomeStr.startsWith("#")) {
                     // 添加原始 Tag
                     appender.addTag(TagKey.create(Registries.BIOME, ResourceLocation.parse(biomeStr.substring(1))));

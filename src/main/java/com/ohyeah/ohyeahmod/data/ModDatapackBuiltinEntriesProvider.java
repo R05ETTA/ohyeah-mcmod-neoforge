@@ -1,7 +1,6 @@
 package com.ohyeah.ohyeahmod.data;
 
 import com.ohyeah.ohyeahmod.OhYeah;
-import com.ohyeah.ohyeahmod.config.SpeciesConfig;
 import com.ohyeah.ohyeahmod.worldgen.ModEntityBiomeModifiers;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.RegistrySetBuilder;
@@ -32,26 +31,25 @@ public class ModDatapackBuiltinEntriesProvider extends DatapackBuiltinEntriesPro
                 HolderGetter<EntityType<?>> entityTypes = context.lookup(Registries.ENTITY_TYPE);
 
                 for (ModEntityBiomeModifiers.NaturalSpawnPlan plan : ModEntityBiomeModifiers.naturalSpawns()) {
-                    SpeciesConfig.Spawn config = plan.spawnConfig();
-                    if (!config.enabled() || config.biomes().isEmpty()) continue;
+                    if (plan.biomes().isEmpty()) continue;
 
                     // 引用物种专用生成 Tag: ohyeah:has_spawn_<species_id>
-                    TagKey<Biome> speciesTag = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OhYeah.MODID, "has_spawn_" + plan.entityId()));
+                    TagKey<Biome> speciesTag = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(OhYeah.MODID, "has_spawn_" + plan.speciesId()));
 
-                    ResourceLocation entityLoc = ResourceLocation.fromNamespaceAndPath(OhYeah.MODID, plan.entityId());
+                    ResourceLocation entityLoc = ResourceLocation.fromNamespaceAndPath(OhYeah.MODID, plan.speciesId());
                     
                     // 注册单一聚合的 Biome Modifier
                     ResourceKey<net.neoforged.neoforge.common.world.BiomeModifier> modifierKey = 
                             ResourceKey.create(NeoForgeRegistries.Keys.BIOME_MODIFIERS, 
-                            ResourceLocation.fromNamespaceAndPath(OhYeah.MODID, plan.resourceName()));
+                            ResourceLocation.fromNamespaceAndPath(OhYeah.MODID, plan.planId()));
 
                     context.register(modifierKey, new BiomeModifiers.AddSpawnsBiomeModifier(
                             biomes.getOrThrow(speciesTag),
                             List.of(new MobSpawnSettings.SpawnerData(
                                     entityTypes.getOrThrow(ResourceKey.create(Registries.ENTITY_TYPE, entityLoc)).value(),
-                                    config.weight(),
-                                    config.minGroup(),
-                                    config.maxGroup()
+                                    plan.weight(),
+                                    plan.minGroup(),
+                                    plan.maxGroup()
                             ))
                     ));
                 }

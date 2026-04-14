@@ -1,61 +1,70 @@
 package com.ohyeah.ohyeahmod.worldgen;
 
-import com.ohyeah.ohyeahmod.config.ModSpeciesConfigs;
-import com.ohyeah.ohyeahmod.config.SpeciesConfig;
+import com.ohyeah.ohyeahmod.entity.SuxiaEntity;
+import com.ohyeah.ohyeahmod.entity.TiansuluoBattleFaceEntity;
+import com.ohyeah.ohyeahmod.entity.TiansuluoPinkScarfEntity;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * 模组实体生物群系生成修正器。
- * 负责定义各物种在世界中的自然分布方案。
+ * 集中管理所有生物群系修改（如自然生成规则）。
  */
 public final class ModEntityBiomeModifiers {
-    
-    private ModEntityBiomeModifiers() {
-    }
+    private ModEntityBiomeModifiers() {}
 
     /**
-     * 获取当前生效的自然生成方案列表。
-     * 采用动态方法获取配置，确保其值与 TOML 配置文件同步。
+     * 定义所有自然生成计划。
+     * 格式：[计划唯一标识, 物种ID, 权重, 最小群组, 最大群组, 生物群系列表]
      */
     public static List<NaturalSpawnPlan> naturalSpawns() {
         return List.of(
-                NaturalSpawnPlan.forSpecies("tiansuluo_pink_scarf_spawn", ModSpeciesConfigs.pinkScarf()),
-                NaturalSpawnPlan.forSpecies("tiansuluo_battle_face_spawn", ModSpeciesConfigs.battleFace()),
-                NaturalSpawnPlan.forSpecies("suxia_spawn", ModSpeciesConfigs.suxia())
+                new NaturalSpawnPlan(
+                        "tiansuluo_pink_scarf_spawn", 
+                        TiansuluoPinkScarfEntity.SPECIES_ID, 
+                        TiansuluoPinkScarfEntity.SPAWN_WEIGHT, 
+                        TiansuluoPinkScarfEntity.SPAWN_MIN_GROUP, 
+                        TiansuluoPinkScarfEntity.SPAWN_MAX_GROUP, 
+                        TiansuluoPinkScarfEntity.SPAWN_BIOMES
+                ),
+                new NaturalSpawnPlan(
+                        "tiansuluo_battle_face_spawn", 
+                        TiansuluoBattleFaceEntity.SPECIES_ID, 
+                        TiansuluoBattleFaceEntity.SPAWN_WEIGHT, 
+                        TiansuluoBattleFaceEntity.SPAWN_MIN_GROUP, 
+                        TiansuluoBattleFaceEntity.SPAWN_MAX_GROUP, 
+                        TiansuluoBattleFaceEntity.SPAWN_BIOMES
+                ),
+                new NaturalSpawnPlan(
+                        "suxia_spawn", 
+                        SuxiaEntity.SPECIES_ID, 
+                        SuxiaEntity.SPAWN_WEIGHT, 
+                        SuxiaEntity.SPAWN_MIN_GROUP, 
+                        SuxiaEntity.SPAWN_MAX_GROUP, 
+                        SuxiaEntity.DEFAULT_SPAWN_BIOMES
+                )
         );
     }
 
-    /**
-     * 获取当前生成方案的简要摘要，用于日志输出。
-     */
     public static String summary() {
-        return naturalSpawns().stream()
-                .map(NaturalSpawnPlan::toSummary)
-                .collect(Collectors.joining("；"));
+        return "已配置 " + naturalSpawns().size() + " 个生成计划";
     }
 
     /**
-     * 内部记录类：定义单个物种的生成计划。
+     * 内部记录类，用于 Datagen 将计划转换为 JSON 格式。
      */
-    public record NaturalSpawnPlan(String resourceName, String entityId, SpeciesConfig.Spawn spawnConfig) {
-        public static NaturalSpawnPlan forSpecies(String resourceName, SpeciesConfig species) {
-            return new NaturalSpawnPlan(resourceName, species.speciesId(), species.spawn());
-        }
-
-        private String toSummary() {
-            return resourceName
-                    + " -> "
-                    + entityId
-                    + "（权重 "
-                    + spawnConfig.weight()
-                    + "，群组 "
-                    + spawnConfig.minGroup()
-                    + "-"
-                    + spawnConfig.maxGroup()
-                    + "，生物群系 "
-                    + String.join(", ", spawnConfig.biomes())
-                    + "）";
+    public record NaturalSpawnPlan(
+            String planId, 
+            String speciesId, 
+            int weight, 
+            int minGroup, 
+            int maxGroup, 
+            List<String> biomes
+    ) {
+        @Override
+        public String toString() {
+            return "计划：" + planId + "（物种：" + speciesId 
+                    + "，权重：" + weight 
+                    + "，群组 " + minGroup + "-" + maxGroup 
+                    + "，群系 " + String.join(", ", biomes) + "）";
         }
     }
 }

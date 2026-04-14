@@ -1,7 +1,8 @@
 package com.ohyeah.ohyeahmod.data;
 
-import com.ohyeah.ohyeahmod.config.ModSpeciesConfigs;
-import com.ohyeah.ohyeahmod.config.SpeciesConfig;
+import com.ohyeah.ohyeahmod.entity.SuxiaEntity;
+import com.ohyeah.ohyeahmod.entity.TiansuluoBattleFaceEntity;
+import com.ohyeah.ohyeahmod.entity.TiansuluoPinkScarfEntity;
 import com.ohyeah.ohyeahmod.registry.ModBlocks;
 import com.ohyeah.ohyeahmod.registry.ModEntityTypes;
 import net.minecraft.core.HolderLookup;
@@ -26,11 +27,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-/**
- * 掉落表生成器 - 1.21.1 最终修正版
- */
-public class ModLootTableProvider {
-
+public final class ModLootTableProvider {
     public static LootTableProvider create(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         return new LootTableProvider(output, Set.of(), List.of(
                 new LootTableProvider.SubProviderEntry(ModBlockLoot::new, LootContextParamSets.BLOCK),
@@ -38,52 +35,43 @@ public class ModLootTableProvider {
         ), registries);
     }
 
-    private static class ModBlockLoot extends BlockLootSubProvider {
-        protected ModBlockLoot(HolderLookup.Provider provider) {
-            super(Collections.emptySet(), FeatureFlags.REGISTRY.allFlags(), provider);
+    public static class ModBlockLoot extends BlockLootSubProvider {
+        protected ModBlockLoot(HolderLookup.Provider registries) {
+            super(Collections.emptySet(), FeatureFlags.REGISTRY.allFlags(), registries);
         }
 
         @Override
         protected void generate() {
-            this.add(ModBlocks.TIANSULUO_PINK_SCARF_LUANLUAN_BLOCK.get(), LootTable.lootTable());
-            this.add(ModBlocks.TIANSULUO_BATTLE_FACE_LUANLUAN_BLOCK.get(), LootTable.lootTable());
+            dropSelf(ModBlocks.TIANSULUO_PINK_SCARF_LUANLUAN_BLOCK.get());
+            dropSelf(ModBlocks.TIANSULUO_BATTLE_FACE_LUANLUAN_BLOCK.get());
         }
 
         @Override
         protected Iterable<Block> getKnownBlocks() {
-            // 显式强制转型为 Block 以解决 1.21.1 泛型推导问题
             return Stream.of(
-                    ModBlocks.TIANSULUO_PINK_SCARF_LUANLUAN_BLOCK.get(),
-                    ModBlocks.TIANSULUO_BATTLE_FACE_LUANLUAN_BLOCK.get()
-            ).map(b -> (Block) b).toList();
+                    ModBlocks.TIANSULUO_PINK_SCARF_LUANLUAN_BLOCK,
+                    ModBlocks.TIANSULUO_BATTLE_FACE_LUANLUAN_BLOCK
+            ).map(supplier -> (Block) supplier.get())::iterator;
         }
     }
 
-    private static class ModEntityLoot extends EntityLootSubProvider {
-        protected ModEntityLoot(HolderLookup.Provider provider) {
-            super(FeatureFlags.REGISTRY.allFlags(), provider);
+    public static class ModEntityLoot extends EntityLootSubProvider {
+        protected ModEntityLoot(HolderLookup.Provider registries) {
+            super(FeatureFlags.REGISTRY.allFlags(), registries);
         }
 
         @Override
         public void generate() {
-            generateForSpecies("tiansuluo_pink_scarf", ModEntityTypes.TIANSULUO_PINK_SCARF.get());
-            generateForSpecies("tiansuluo_battle_face", ModEntityTypes.TIANSULUO_BATTLE_FACE.get());
-            generateForSpecies("suxia", ModEntityTypes.SUXIA.get());
+            generateForSpecies(ModEntityTypes.TIANSULUO_PINK_SCARF.get(), TiansuluoPinkScarfEntity.FOOD_FAVORITE); // 示例：掉落喜爱食物
+            generateForSpecies(ModEntityTypes.TIANSULUO_BATTLE_FACE.get(), TiansuluoBattleFaceEntity.FOOD_FAVORITE);
+            generateForSpecies(ModEntityTypes.SUXIA.get(), SuxiaEntity.ADULT_LOOT_ITEMS);
         }
 
-        private void generateForSpecies(String speciesId, EntityType<?> type) {
-            SpeciesConfig.Loot config = ModSpeciesConfigs.get(speciesId).loot();
-            
-            // 鲁棒性检查：如果 Loot 配置不存在，或者显式禁用，或者掉落列表为空，则生成空掉落表
-            if (config == null || !config.enabled() || config.adultDropItemIds().isEmpty()) {
-                this.add(type, LootTable.lootTable());
-                return;
-            }
-
+        private void generateForSpecies(EntityType<?> type, List<String> lootItems) {
             LootTable.Builder builder = LootTable.lootTable();
             LootPool.Builder pool = LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F));
             
-            for (String itemId : config.adultDropItemIds()) {
+            for (String itemId : lootItems) {
                 pool.add(LootItem.lootTableItem(BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId))));
             }
             

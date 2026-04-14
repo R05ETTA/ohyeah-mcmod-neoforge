@@ -1,25 +1,27 @@
 package com.ohyeah.ohyeahmod.entity.ai;
 
-import com.ohyeah.ohyeahmod.entity.TiansuluoBattleFaceEntity;
+import com.ohyeah.ohyeahmod.entity.common.Pounceable;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.EnumSet;
 
-public final class TiansuluoBattleFacePounceGoal extends Goal {
-    private static final int MAX_FLIGHT_TICKS = 12;
-    private static final double HITBOX_PADDING = 0.2D;
-
-    private final TiansuluoBattleFaceEntity entity;
+/**
+ * 泛用物理飞扑攻击 AI 目标。
+ * 任何继承了 Mob 且实现了 Pounceable 接口的生物都可以挂载此 AI。
+ */
+public class PounceAttackGoal<T extends Mob & Pounceable> extends Goal {
+    private final T entity;
     private LivingEntity committedTarget;
     private int flightTicksRemaining;
     private boolean launched;
     private boolean resolved;
 
-    public TiansuluoBattleFacePounceGoal(TiansuluoBattleFaceEntity entity) {
+    public PounceAttackGoal(T entity) {
         this.entity = entity;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK, Goal.Flag.JUMP));
     }
@@ -39,14 +41,13 @@ public final class TiansuluoBattleFacePounceGoal extends Goal {
         return !this.resolved
                 && this.entity.isReadyToPounce()
                 && this.committedTarget != null
-                && this.entity.getTarget() == this.committedTarget
-                && this.launched;
+                && this.entity.getTarget() == this.committedTarget;
     }
 
     @Override
     public void start() {
         this.committedTarget = this.entity.getTarget();
-        this.flightTicksRemaining = MAX_FLIGHT_TICKS;
+        this.flightTicksRemaining = this.entity.getPounceMaxFlightTicks();
         this.launched = false;
         this.resolved = false;
         this.entity.beginCharge();
@@ -93,10 +94,10 @@ public final class TiansuluoBattleFacePounceGoal extends Goal {
         Vec3 horizontalDirection = horizontal.lengthSqr() > 1.0E-7D ? horizontal.normalize() : Vec3.ZERO;
 
         double horizontalSpeed = Math.max(
-                Math.max(this.entity.getSpeciesConfig().behavior().pounceLeapHorizontalSpeed(), 0.9D),
+                this.entity.getPounceHorizontalSpeed(),
                 Math.min(1.3D, horizontal.length() * 0.4D)
         );
-        double verticalBase = Math.max(this.entity.getSpeciesConfig().behavior().pounceLeapVerticalSpeed(), 0.42D);
+        double verticalBase = this.entity.getPounceVerticalSpeed();
         double verticalOffset = Mth.clamp(delta.y * 0.25D, -0.18D, 0.3D);
         double verticalSpeed = Mth.clamp(verticalBase + verticalOffset, 0.24D, 0.95D);
 
@@ -106,8 +107,9 @@ public final class TiansuluoBattleFacePounceGoal extends Goal {
     }
 
     private boolean tryResolveHit(LivingEntity target) {
-        AABB hitBox = this.entity.getBoundingBox().inflate(HITBOX_PADDING);
-        if (!hitBox.intersects(target.getBoundingBox().inflate(HITBOX_PADDING))) {
+        double padding = this.entity.getPounceHitboxPadding();
+        AABB hitBox = this.entity.getBoundingBox().inflate(padding);
+        if (!hitBox.intersects(target.getBoundingBox().inflate(padding))) {
             return false;
         }
 

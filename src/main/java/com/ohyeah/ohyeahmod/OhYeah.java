@@ -12,16 +12,12 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import org.slf4j.Logger;
 
-import net.neoforged.fml.config.ModConfig;
-
 @Mod(OhYeah.MODID)
 public class OhYeah {
     public static final String MODID = "ohyeah";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public OhYeah(IEventBus modEventBus, ModContainer modContainer) {
-        modContainer.registerConfig(ModConfig.Type.COMMON, com.ohyeah.ohyeahmod.config.ModConfig.COMMON_SPEC);
-        
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
         ModEntityTypes.register(modEventBus);

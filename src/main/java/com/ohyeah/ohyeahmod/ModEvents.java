@@ -1,7 +1,6 @@
 package com.ohyeah.ohyeahmod;
 
 import com.ohyeah.ohyeahmod.entity.logic.SleepWakeGameplayCoordinator;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

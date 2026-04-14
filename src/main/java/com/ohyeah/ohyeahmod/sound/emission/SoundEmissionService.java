@@ -10,6 +10,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public final class SoundEmissionService {
+    // --- 全局音效系统常量 (硬编码操作) ---
+    public static final int LISTENER_BUDGET = 16;
+    public static final int SPECIES_AMBIENT_CAP = 3;
+    public static final int AMBIENT_WINDOW_RADIUS = 16;
+
     private SoundEmissionService() {
     }
 
@@ -37,9 +42,9 @@ public final class SoundEmissionService {
                 participant.soundEntity().getRandom().nextLong(),
                 decision.durationTicks(),
                 decision.useLimiter(),
-                participant.soundVoiceConfig().listenerBudget(),
-                participant.soundVoiceConfig().speciesAmbientCap(),
-                participant.soundVoiceConfig().ambientWindowRadius()
+                LISTENER_BUDGET,
+                SPECIES_AMBIENT_CAP,
+                AMBIENT_WINDOW_RADIUS
         );
         PacketDistributor.sendToPlayersTrackingChunk(serverLevel, participant.soundEntity().chunkPosition(), payload);
     }
