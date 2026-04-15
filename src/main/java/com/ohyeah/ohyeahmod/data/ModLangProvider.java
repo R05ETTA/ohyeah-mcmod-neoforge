@@ -148,7 +148,7 @@ public abstract class ModLangProvider extends LanguageProvider {
             addBlock(ModBlocks.TIANSULUO_BATTLE_FACE_LUANLUAN_BLOCK, "天素罗_战斗脸栾栾块");
 
             // Creative Tab
-            add("itemGroup.ohyeah.main", "Oh Yeah!");
+            add("itemGroup.ohyeah.main", "哦耶！");
 
             // Messages - Pink Scarf
             add("message.ohyeah.tiansuluo_pink_scarf.luanluan_block_carried", "天素罗_粉围巾已进入带蛋状态，会在你附近寻找位置放置栾栾块");
